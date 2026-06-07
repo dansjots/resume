@@ -1,0 +1,55 @@
+<h2>Decrypt fith with a secret key:</h2>
+<input id="agekey" placeholder="AGE-SECRET-KEY-ABCD1234...">
+<button id="decrypt_button" onclick="on_decrypt_button()">Decrypt</button>
+<pre id="errors" style="color:red"></pre>
+<script src="age-0.3.0.min.js"></script>
+<script>
+const args = new URLSearchParams(window.location.search);
+if (args.get('agekey')) {
+    document.getElementById('agekey').value = args.get('agekey');
+    on_decrypt_button();
+}
+
+async function on_decrypt_button() {
+    document.getElementById('decrypt_button').disabled = true;
+    document.getElementById('errors').innerHTML = '';
+    const secretKey = document.getElementById('agekey').value;
+    const pdf = await decrypt('resume.pdf', secretKey);
+    const svg = await decrypt('resume.svg', secretKey);
+    if (pdf && svg) {
+        const pdf_opt = { headers: { 'content-type': 'application/pdf' } };
+        const svg_opt = { headers: { 'content-type': 'image/svg+xml' } };
+        const pdf_blob = await (new Response(pdf, pdf_opt)).blob();
+        const svg_blob = await (new Response(svg, svg_opt)).blob();
+        const pdf_url = URL.createObjectURL(pdf_blob);
+        const svg_url = URL.createObjectURL(svg_blob);
+
+        let anchor = document.createElement('a');
+        anchor.href = pdf_url;
+        anchor.download = 'resume.pdf';
+        anchor.textContent = 'Download resume.pdf';
+
+        let image = document.createElement('img');
+        image.src = svg_url;
+        image.style.outline = '1px solid black';
+
+        document.body.innerHTML = '';
+        document.body.append(anchor);
+        document.body.append(document.createElement('br'));
+        document.body.append(image);
+    } else {
+        document.getElementById('decrypt_button').disabled = false;
+    }
+}
+
+async function decrypt(src_url, identity) {
+    try {
+        const decrypter = new age.Decrypter();
+        decrypter.addIdentity(identity);
+        return decrypter.decrypt((await fetch(src_url)).body);
+    } catch (e) {
+        document.getElementById('errors').textContent = e;
+    }
+    return null;
+}
+</script>
