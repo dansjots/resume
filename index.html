@@ -1,23 +1,17 @@
-<!DOCTYPE html>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>svg { outline: 1px solid black; } body { margin: 0; background-color: grey; }</style>
-<center id="main">
-  <h2>Decrypt file with a secret key:</h2>
-  <input id="agekey" placeholder="AGE-SECRET-KEY-ABCD1234...">
-  <button id="decrypt_button" onclick="on_decrypt_button()">Decrypt</button>
-  <pre id="errors" style="color:red"></pre>
-</center>
+<h2>Decrypt file with a secret key:</h2>
+<input id="agekey" placeholder="AGE-SECRET-KEY-ABCD1234...">
+<button id="decrypt_button" onclick="decrypt()">Decrypt</button>
+<pre id="errors" style="color:red"></pre>
 <script src="age-0.3.0.min.js"></script>
 <script>
 {
   const args = new URLSearchParams(window.location.search);
   if (args.get('agekey')) {
     document.getElementById('agekey').value = args.get('agekey');
-    on_decrypt_button();
+    decrypt();
   }
 }
-async function on_decrypt_button() {
+async function decrypt() {
   document.getElementById('decrypt_button').disabled = true;
   document.getElementById('errors').innerHTML = '';
   const secretKey = document.getElementById('agekey').value;
@@ -25,15 +19,9 @@ async function on_decrypt_button() {
   try {
     decrypter.addIdentity(secretKey);
     const pdf = await decrypter.decrypt((await fetch('resume.pdf')).body);
-    const svg = await decrypter.decrypt((await fetch('resume.svg')).body);
-    if (pdf && svg) {
-      const pdf_opt = { headers: { 'content-type': 'application/pdf' } };
-      const pdf_blob = await (new Response(pdf, pdf_opt)).blob();
-      document.getElementById('main').innerHTML =
-        '<a href="' + URL.createObjectURL(pdf_blob) +
-        '" download="resume.pdf"><h2>Download resume.pdf</h2></a>' +
-        await (new Response(svg)).text();
-      return;
+    if (pdf) {
+      const opt = { headers: { 'content-type': 'application/pdf' } };
+      document.location = URL.createObjectURL(await (new Response(pdf, opt)).blob());
     }
   } catch (e) {
     document.getElementById('errors').textContent = e;
