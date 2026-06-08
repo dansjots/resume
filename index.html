@@ -2,10 +2,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>svg { outline: 1px solid black; } body { margin: 0; background-color: grey; }</style>
-<h2>Decrypt file with a secret key:</h2>
-<input id="agekey" placeholder="AGE-SECRET-KEY-ABCD1234...">
-<button id="decrypt_button" onclick="on_decrypt_button()">Decrypt</button>
-<pre id="errors" style="color:red"></pre>
+<center id="main">
+  <h2>Decrypt file with a secret key:</h2>
+  <input id="agekey" placeholder="AGE-SECRET-KEY-ABCD1234...">
+  <button id="decrypt_button" onclick="on_decrypt_button()">Decrypt</button>
+  <pre id="errors" style="color:red"></pre>
+</center>
 <script src="age-0.3.0.min.js"></script>
 <script>
 {
@@ -27,9 +29,10 @@ async function on_decrypt_button() {
     if (pdf && svg) {
       const pdf_opt = { headers: { 'content-type': 'application/pdf' } };
       const pdf_blob = await (new Response(pdf, pdf_opt)).blob();
-      document.body.outerHTML = '<center><a href="' + URL.createObjectURL(pdf_blob) +
+      document.getElementById('main').innerHTML =
+        '<a href="' + URL.createObjectURL(pdf_blob) +
         '" download="resume.pdf"><h2>Download resume.pdf</h2></a>' +
-        await (new Response(svg)).text() + '</center>';
+        await (new Response(svg)).text();
       return;
     }
   } catch (e) {
