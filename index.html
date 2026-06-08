@@ -21,7 +21,10 @@ async function decrypt() {
     const pdf = await decrypter.decrypt((await fetch('resume.pdf')).body);
     if (pdf) {
       const opt = { headers: { 'content-type': 'application/pdf' } };
-      document.location = URL.createObjectURL(await (new Response(pdf, opt)).blob());
+      const res = new Response(pdf, opt);
+      res.blob().then((url) => {
+        document.location = URL.createObjectURL(url);
+      });
     }
   } catch (e) {
     document.getElementById('errors').textContent = e;
