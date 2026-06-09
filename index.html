@@ -18,12 +18,12 @@ async function decrypt() {
   const decrypter = new age.Decrypter();
   try {
     decrypter.addIdentity(secretKey);
-    const pdf = await decrypter.decrypt((await fetch('resume.pdf')).body);
+    const pdf = await decrypter.decrypt((await fetch('resume.pdf.age')).body);
     if (pdf) {
       const opt = { headers: { 'content-type': 'application/pdf' } };
       const res = new Response(pdf, opt);
       res.blob().then((obj) => {
-        document.location = URL.createObjectURL(obj);
+        window.location = URL.createObjectURL(obj);
       });
     }
   } catch (e) {
