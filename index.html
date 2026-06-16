@@ -22,9 +22,8 @@ async function decrypt() {
     if (pdf) {
       const opt = { headers: { 'content-type': 'application/pdf' } };
       const res = new Response(pdf, opt);
-      res.blob().then((obj) => {
-        window.location = URL.createObjectURL(obj);
-      });
+      const obj = await res.blob();
+      window.location.href = URL.createObjectURL(obj);
     }
   } catch (e) {
     document.getElementById('errors').textContent = e;
